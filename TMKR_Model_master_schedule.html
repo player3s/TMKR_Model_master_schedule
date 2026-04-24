@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Schedule Master</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;padding:24px;font-size:13px}
+h1{font-size:15px;font-weight:600;margin-bottom:18px}
+.topbar{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px;background:#fff;border:0.5px solid #dddbd3;border-radius:10px;padding:14px 16px}
+.ctrl{display:flex;flex-direction:column;gap:3px}
+.fl{font-size:10px;color:#888780;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.seg,.gseg{display:flex;overflow:hidden;border:0.5px solid #c4c2b9;border-radius:6px}
+.pseg{display:flex;border:0.5px solid #c4c2b9;border-radius:6px}
+.pseg .pb:first-child{border-radius:5px 0 0 5px}
+.pseg .pb:last-child{border-radius:0 5px 5px 0}
+.sb,.pb,.gb{padding:5px 11px;font-size:12px;border:none;border-right:0.5px solid #c4c2b9;background:none;color:#5f5e5a;cursor:pointer;white-space:nowrap}
+.sb:last-child,.pb:last-child,.gb:last-child{border-right:none}
+.sb.on{background:#e6f1fb;color:#185fa5;font-weight:500}
+.pb.on{background:#fef9ec;color:#92400e;font-weight:500}
+.gb.on{background:#f0ebfe;color:#6d28d9;font-weight:500}
+select{font-size:12px;border:0.5px solid #dddbd3;border-radius:4px;padding:4px 8px;color:#1a1a18;background:#fff}
+/* Model cards */
+.mcards-area{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-start}
+.mcard{background:#fff;border:0.5px solid #dddbd3;border-radius:10px;padding:12px 14px;min-width:230px}
+.mcard-top{display:flex;align-items:center;gap:6px;margin-bottom:8px;border-bottom:0.5px solid #e8e6df;padding-bottom:8px}
+.mcard-color{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mname{font-size:13px;font-weight:600;border:none;background:none;color:#1a1a18;outline:none;flex:1;min-width:0;padding:0}
+.rm-model{font-size:16px;color:#c4c2b9;background:none;border:none;cursor:pointer;padding:0 2px;line-height:1}
+.rm-model:hover{color:#dc2626}
+.order-btn{font-size:12px;color:#c4c2b9;background:none;border:0.5px solid #e8e6df;border-radius:4px;cursor:pointer;padding:1px 5px;line-height:1.4}
+.order-btn:hover{background:#f5f4f0;color:#5f5e5a}
+.order-btn:disabled{opacity:.25;cursor:default}
+.mcard .pseg{margin-bottom:8px}
+.mcard .pb{padding:3px 0;font-size:11px;width:48px;text-align:center;flex:1}
+.mylist{display:flex;flex-direction:column;gap:4px;margin-bottom:6px;max-height:112px;overflow-y:auto;padding-right:2px}
+.mrow{display:flex;align-items:center;gap:4px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+input.mni{width:48px;font-size:11px;font-weight:500;border:0.5px solid #dddbd3;border-radius:4px;padding:2px 5px;color:#1a1a18;background:#fff}
+input[type=month]{font-size:11px;border:0.5px solid #dddbd3;border-radius:4px;padding:2px 5px;color:#1a1a18;background:#fff}
+select.mts{font-size:10px;border:0.5px solid #dddbd3;border-radius:4px;padding:2px 4px;color:#1a1a18;background:#fff;font-weight:500}
+select.mts.btc{color:#b45309;background:#fffbeb;border-color:#fcd34d}
+.abtn{font-size:11px;color:#5f5e5a;background:none;border:0.5px solid #c4c2b9;padding:3px 9px;border-radius:6px;cursor:pointer}
+.abtn:hover{background:#f5f4f0}
+.rbtn{font-size:14px;line-height:1;color:#c4c2b9;background:none;border:none;cursor:pointer;padding:0}
+.tv-row{padding-left:11px;margin-top:2px!important;gap:5px!important}
+.tv-lbl{font-size:9px;color:#888780;font-weight:600;width:16px;flex-shrink:0;letter-spacing:.02em}
+.eco-chk{display:flex;align-items:center;gap:2px;font-size:10px;color:#5f5e5a;cursor:pointer;white-space:nowrap}
+.buf-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;font-size:11px}
+.buf-row b{min-width:120px;font-weight:500;color:#5f5e5a;font-size:10px}
+.buf-inp{width:38px;font-size:11px;text-align:center;border:0.5px solid #dddbd3;border-radius:4px;padding:2px 4px}
+.sa-hdr{background:#DCFCE7!important;color:#15803D!important;border-left:2px solid #22C55E!important;border-right:2px solid #22C55E!important;font-weight:700!important}
+.sa-cell{background:#DCFCE7!important;border-left:2px solid #22C55E!important;border-right:2px solid #22C55E!important}
+.tv-seg{display:flex;overflow:hidden;border:0.5px solid #c4c2b9;border-radius:5px;margin-top:2px}
+.tvb{padding:2px 8px;font-size:10px;border:none;border-right:0.5px solid #c4c2b9;background:none;color:#5f5e5a;cursor:pointer}
+.tvb:last-child{border-right:none}
+.tvb.on{background:#f0fdf4;color:#15803d;font-weight:600}
+.tv-type{font-size:10px;border:0.5px solid #dddbd3;border-radius:4px;padding:1px 4px;color:#1a1a18;background:#fff}
+.add-model-card{background:none;border:1.5px dashed #dddbd3;border-radius:10px;padding:12px 20px;color:#888780;font-size:12px;cursor:pointer;min-width:110px;min-height:60px;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-model-card:hover{border-color:#b4b2a9;color:#5f5e5a;background:#fafaf8}
+/* Gantt */
+#gw{overflow-x:auto;margin-bottom:10px}
+table.g{border-collapse:collapse;font-size:11px;background:#fff;border:0.5px solid #dddbd3}
+table.g th,table.g td{border:0.5px solid #e8e6df}
+table.g th{font-weight:500;color:#888780;text-align:center;background:#f9f8f5;padding:3px 1px;white-space:nowrap}
+table.g td{background:#fff;padding:0;height:26px;vertical-align:middle}
+.thfix{text-align:left!important;padding-left:7px!important;white-space:nowrap}
+.mc{font-size:11px;font-weight:600;color:#1a1a18;padding:0 7px;min-width:80px;white-space:nowrap}
+.tkc{font-size:11px;color:#5f5e5a;padding:2px 7px;white-space:nowrap;min-width:108px}
+.wkcol{min-width:30px}
+.mcat{font-size:10px!important;font-weight:700!important;letter-spacing:.02em;padding:5px 7px 4px!important}
+.cat{font-size:9px!important;font-weight:600!important;color:#888780!important;letter-spacing:.08em;text-transform:uppercase;padding:5px 7px 3px!important;background:#f5f4f0!important}
+.bc{padding:2px 0}
+.bar{height:20px;display:flex;align-items:center;padding:0 7px;overflow:hidden}
+.bar span{font-size:9.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c0{background:#B5D4F4}.c0 span{color:#0D4F96}
+.c1{background:#64A8E8}.c1 span{color:#042C53}
+.c2{background:#2B7FD4}.c2 span{color:#E6F1FB}
+.c3{background:#0D4F96}.c3 span{color:#E6F1FB}
+.hc0{background:#CCFBF1}.hc0 span{color:#134E4A}
+.hc1{background:#5EEAD4}.hc1 span{color:#134E4A}
+.hc2{background:#2DD4BF}.hc2 span{color:#0D3330}
+.hc3{background:#0D9488}.hc3 span{color:#F0FDFA}
+.hc4{background:#0F766E}.hc4 span{color:#F0FDFA}
+.buf{background:#F5F4F0}.buf span{color:#B4B2A9}
+.mi{border:none;background:none;font-size:11px;font-weight:600;color:#1a1a18;width:100%;outline:none}
+.mi::placeholder{color:#c4c2b9;font-weight:400;font-size:10px}
+/* Legend */
+.leg{display:flex;gap:8px 14px;flex-wrap:wrap;font-size:11px;color:#5f5e5a;margin-bottom:12px;background:#fff;border:0.5px solid #dddbd3;border-radius:8px;padding:9px 13px}
+.ld{display:inline-block;vertical-align:middle;margin-right:3px}
+/* Settings */
+.sp{border:0.5px solid #dddbd3;border-radius:10px;overflow:hidden;background:#fff}
+.sph{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:#f5f4f0;cursor:pointer;user-select:none;border-bottom:0.5px solid #dddbd3}
+.sph span:first-child{font-size:12px;font-weight:500;color:#5f5e5a}
+.spb{display:none;padding:.7rem 1rem}
+.spb.open{display:block}
+.spg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.9rem}
+.sc{font-size:9px;font-weight:700;color:#888780;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem;padding-bottom:3px;border-bottom:0.5px solid #e8e6df}
+.sr{display:flex;align-items:center;gap:4px;margin-bottom:4px;font-size:11px;color:#5f5e5a}
+.sr b{font-weight:600;color:#1a1a18;min-width:95px;flex-shrink:0}
+.sdot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
+.hint{font-size:10px;color:#c4c2b9;margin-top:.5rem}
+/* Brand tabs */
+.brand-bar{display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid #e8e6df}
+.brand-tab{padding:8px 22px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:#888780;border-bottom:3px solid transparent;margin-bottom:-2px;letter-spacing:.01em}
+.brand-tab:hover{color:#1a1a18}
+.brand-tab.on-T{color:#CC0000;border-bottom-color:#CC0000}
+.brand-tab.on-L{color:#1a1a18;border-bottom-color:#1a1a18}
+.brand-tab.on-G{color:#b45309;border-bottom-color:#b45309}
+.brand-cnt{display:inline-block;font-size:10px;font-weight:500;background:#e8e6df;color:#888780;border-radius:9px;padding:1px 6px;margin-left:5px;vertical-align:middle}
+.mtbadge{font-size:9px;font-weight:700;padding:1px 4px;border-radius:3px}
+.mt-MY{background:#e8e6df;color:#5f5e5a}
+.mt-other{background:#fef3c7;color:#92400e}
+/* Getsudo */
+.g-hdr{background:#f0ebfe!important;color:#6d28d9!important;border-left:2px dashed #a78bfa!important;font-weight:600!important}
+.g-r0{background:#f5f3ff!important;border-left:2px dashed #a78bfa!important}
+
+
+/* Collapsible control panel */
+.cpanel-toggle{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:#fff;border:0.5px solid #dddbd3;border-radius:10px;cursor:pointer;user-select:none;min-width:fit-content}
+.cpanel-toggle:hover{background:#fafaf8}
+.cpanel-title{font-size:12px;font-weight:500;color:#5f5e5a;display:flex;align-items:center;gap:8px}
+.cpanel-pip{display:flex;gap:3px}
+.cpanel-pip span{width:6px;height:6px;border-radius:50%}
+.cpanel-arrow{font-size:11px;color:#b4b2a9;transition:transform .2s}
+.cpanel-arrow.open{transform:rotate(180deg)}
+.cpanel-body{overflow:hidden;transition:all .2s}
+.cpanel-body.collapsed{display:none}
+
+/* JSON toolbar */
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tbtn{display:flex;align-items:center;gap:6px;padding:7px 14px;font-size:12px;font-weight:500;border-radius:7px;border:0.5px solid #dddbd3;cursor:pointer;background:#fff;color:#1a1a18;white-space:nowrap}
+.tbtn:hover{background:#f5f4f0}
+.tbtn.primary{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.tbtn.primary:hover{background:#333}
+.tbtn.danger{color:#dc2626;border-color:#fca5a5}
+.tbtn.danger:hover{background:#fff5f5}
+.tb-sep{width:1px;height:24px;background:#e8e6df;margin:0 2px}
+.tb-label{font-size:11px;color:#b4b2a9}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a18;color:#fff;padding:9px 18px;border-radius:8px;font-size:12px;font-weight:500;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* OneDrive connect */
+.ond-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f0f7ff;border:0.5px solid #bfdbfe;border-radius:10px;margin-bottom:14px;flex-wrap:wrap}
+.ond-status{display:flex;align-items:center;gap:7px;font-size:12px;color:#1e40af;font-weight:500;flex:1}
+.ond-dot{width:8px;height:8px;border-radius:50%;background:#93c5fd;flex-shrink:0}
+.ond-dot.connected{background:#22c55e}
+.ond-dot.error{background:#ef4444}
+.ond-btns{display:flex;gap:6px}
+.ond-btn{padding:5px 12px;font-size:11px;font-weight:500;border-radius:6px;border:0.5px solid #bfdbfe;cursor:pointer;background:#fff;color:#1e40af;white-space:nowrap}
+.ond-btn:hover{background:#eff6ff}
+.ond-btn.save-btn{background:#1e40af;color:#fff;border-color:#1e40af}
+.ond-btn.save-btn:hover{background:#1d4ed8}
+.ond-btn.save-btn:disabled{background:#93c5fd;border-color:#93c5fd;cursor:not-allowed}
+.save-indicator{font-size:10px;color:#22c55e;font-weight:500;display:none}
+</style>
+</head>
+<body>
+<h1>Schedule Master</h1>
+<div class="brand-bar" id="brandbar">
+  <button class="brand-tab on-T" id="btab-T" onclick="setBrand('TOYOTA')">TOYOTA <span class="brand-cnt" id="bcnt-T">0</span></button>
+  <button class="brand-tab" id="btab-L" onclick="setBrand('LEXUS')">LEXUS <span class="brand-cnt" id="bcnt-L">0</span></button>
+  <button class="brand-tab" id="btab-G" onclick="setBrand('GR')">GR <span class="brand-cnt" id="bcnt-G">0</span></button>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+  <div class="cpanel-toggle" onclick="togglePanel()" id="cpanelToggle" style="margin-bottom:0;flex:0 0 auto">
+    <span class="cpanel-title">
+      <span class="cpanel-pip">
+        <span style="background:#CC0000"></span>
+        <span style="background:#1a1a18"></span>
+        <span style="background:#b45309"></span>
+      </span>
+      설정
+    </span>
+    <span class="cpanel-arrow open" id="cpanelArrow">▼</span>
+  </div>
+  <div class="seg" style="flex:0 0 auto">
+    <button class="sb on" id="bpp" onclick="sm('pp')">Product Planning</button>
+    <button class="sb" id="bhom" onclick="sm('hom')">Homologation</button>
+    <button class="sb" id="bbt" onclick="sm('both')">Both</button>
+  </div>
+</div>
+<div class="cpanel-body" id="cpanelBody">
+<div class="topbar">
+  <div class="ctrl">
+    <span class="fl">Getsudo Change 주차</span>
+    <div class="gseg">
+      <button class="gb" onclick="setGW(1)">W1</button>
+      <button class="gb" onclick="setGW(2)">W2</button>
+      <button class="gb on" onclick="setGW(3)">W3</button>
+      <button class="gb" onclick="setGW(4)">W4</button>
+    </div>
+  </div>
+</div>
+
+<div class="ond-bar" id="ondBar">
+  <span class="ond-dot" id="ondDot"></span>
+  <span class="ond-status" id="ondStatus">OneDrive 폴더가 연결되지 않았습니다</span>
+  <div class="ond-btns">
+    <button class="ond-btn" onclick="connectFolder()">📁 폴더 연결</button>
+    <button class="ond-btn save-btn" id="ondSaveBtn" onclick="saveToFolder()" disabled>💾 저장</button>
+    <span class="save-indicator" id="saveIndicator">저장됨 ✓</span>
+  </div>
+</div>
+<div class="toolbar">
+  <span class="tb-label">데이터</span>
+  <button class="tbtn primary" onclick="exportJSON()">⬇ JSON 저장</button>
+  <button class="tbtn" onclick="document.getElementById('importFile').click()">⬆ JSON 불러오기</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+  <div class="tb-sep"></div>
+  <button class="tbtn" onclick="copyShareText()">🔗 데이터 복사</button>
+  <button class="tbtn danger" onclick="resetData()">↺ 초기화</button>
+</div>
+<div id="toast" class="toast"></div>
+<div class="mcards-area" id="mcards"></div>
+</div><!-- /cpanel-body -->
+<div id="gw"></div>
+<div class="leg" id="lg"></div>
+
+<div class="sp">
+  <div class="sph" onclick="tsp()">
+    <span>⚙ 리드타임 요약</span>
+    <span id="arr" style="font-size:11px;color:#c4c2b9">▼</span>
+  </div>
+  <div class="spb" id="spb">
+    <div class="spg" id="spg"></div>
+    <p class="hint">Production type · MY 연식구분에 따라 자동 계산. BTC/MC/FMC/NEW는 SFX 종료 직후 연속 배치.</p>
+  </div>
+</div>
+
+<script>
+const BY=2020;
+const MNS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MC_COLORS=['#E67E22','#2E86C1','#27AE60','#8E44AD','#C0392B','#16A085'];
+const MC_BGS=['#FEF0E7','#EBF5FB','#E8F8F5','#F4ECF7','#FDEDEC','#E8F6F3'];
+// Per-MY line-off marker colors (cycles globally across all models' MYs)
+const LCA=['#EF9F27','#D85A30','#1D9E75','#7F77DD','#3266AD'];
+const LBA=['#FFF3DE','#FDEAE0','#E1F5EE','#EEEDFE','#E6F1FB'];
+const PL=['#B5D4F4','#64A8E8','#2B7FD4','#0D4F96'];
+const MY_TYPES=['MY','BTC','MC','FMC','NEW'];
+const PT_LIST=['JCBU','NAP','86'];
+
+let MODELS=[
+  {id:1,name:'',brand:'TOYOTA',prodType:'JCBU',
+   mys:[{id:1,name:'27MY',month:'2026-08',myType:'MY'},
+        {id:2,name:'28MY',month:'2027-08',myType:'MY'}]},
+  {id:2,name:'',brand:'LEXUS',prodType:'JCBU',
+   mys:[{id:3,name:'27MY',month:'2026-08',myType:'MY'}]},
+  {id:3,name:'',brand:'GR',prodType:'JCBU',
+   mys:[{id:4,name:'27MY',month:'2026-08',myType:'MY'}]}
+];
+let nextMid=4, nextMyId=100;
+let dispMode='pp', getsudoWeek=3;
+let activeBrand='TOYOTA';
+
+const BRAND_META={
+  TOYOTA:{cls:'on-T',color:'#CC0000',bg:'#FFF5F5'},
+  LEXUS: {cls:'on-L',color:'#1a1a18',bg:'#F5F5F5'},
+  GR:    {cls:'on-G',color:'#b45309',bg:'#FFFBEB'},
+};
+
+function activeModels(){return MODELS.filter(m=>m.brand===activeBrand);}
+function activeModelIdx(localIdx){
+  // find global index of the localIdx-th model in activeBrand
+  let count=0;
+  for(let i=0;i<MODELS.length;i++){
+    if(MODELS[i].brand===activeBrand){if(count===localIdx)return i;count++;}
+  }
+  return -1;
+}
+
+function moveModel(localMi, dir){
+  const branded = MODELS.map((m,i)=>({m,i})).filter(x=>x.m.brand===activeBrand);
+  const targetLocal = localMi + dir;
+  if(targetLocal < 0 || targetLocal >= branded.length) return;
+  const gi = branded[localMi].i;
+  const gi2 = branded[targetLocal].i;
+  // Swap in MODELS array
+  [MODELS[gi], MODELS[gi2]] = [MODELS[gi2], MODELS[gi]];
+  renderCards(); render(); if(spOpen()) renderSp();
+}
+
+function setBrand(b){
+  activeBrand=b;
+  updateBrandTabs();
+  renderCards();render();if(spOpen())renderSp();
+}
+
+function updateBrandTabs(){
+  ['TOYOTA','LEXUS','GR'].forEach(b=>{
+    const tab=document.getElementById('btab-'+b[0]);
+    if(!tab)return;
+    tab.className='brand-tab'+(activeBrand===b?' '+BRAND_META[b].cls:'');
+    const cnt=document.getElementById('bcnt-'+b[0]);
+    if(cnt)cnt.textContent=MODELS.filter(m=>m.brand===b).length;
+  });
+}
+
+// HOM 태스크 정의 (M기준 기간, 단위: 주)
+const HOM_TASKS=[
+  {n:'Vehicle Preparation', dur:4,  ci:0},
+  {n:'TMC Test',            dur:16, ci:1},
+  {n:'FE Test',             dur:4,  ci:2},
+  {n:'Emission/FE/Safety',  dur:12, ci:3},
+  {n:'Eco-car Cert.',       dur:8,  ci:4, optional:true},
+];
+
+// HOM 구간 계산 (M기준 or MY Cert.)
+function getHomRanges(my){
+  const modelLo=mAbs(my);
+  if(my.hasTv===false){
+    // TV 없음 → MY Cert. N-1월~N월(2개월), SA→N+1월
+    return [{n:'MY Cert.', absStart:modelLo-4, absEnd:modelLo+3, cls:'hc3'}];
+  }
+  if(!my.tvLineoff) return [];
+  const tvAbs=mAbs({month:my.tvLineoff});
+  const buffers=my.buffers||[0,0,0,0];
+  const tasks=HOM_TASKS.filter(t=>!t.optional||my.ecoCarCert);
+  let cursor=0;
+  return tasks.map((task,i)=>{
+    const s=tvAbs+cursor;
+    const e=tvAbs+cursor+task.dur-1;
+    cursor+=task.dur+(buffers[i]||0);
+    return{n:task.n, absStart:s, absEnd:e, cls:'hc'+task.ci};
+  });
+}
+
+function getSaAbs(my){
+  const ranges=getHomRanges(my);
+  if(!ranges.length) return null;
+  return Math.max(...ranges.map(r=>r.absEnd))+1;
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function sfxBaseStart(){ return -20+(getsudoWeek-1); }
+function mAbs(my){const[y,m]=my.month.split('-').map(Number);return(y-BY)*48+(m-1)*4;}
+function a2d(a){const yr=BY+Math.floor(a/48);const r=((a%48)+48)%48;return{year:yr,month:Math.floor(r/4),week:r%4+1};}
+function getTaskRanges(my,prodType){
+  const isBTC=my.myType!=='MY';
+  const isNAP=prodType==='NAP';
+  const isNAP86=isNAP||prodType==='86';
+  const sfxShift=isNAP86?-4:0;
+  const sfxS=sfxBaseStart()+sfxShift;
+  const sfxE=-13+sfxShift;
+  let hS,hE,tS,tE,eS,eE;
+  if(isBTC){
+    hS=sfxE+1; hE=sfxE+2;
+    tS=hE+1;   tE=tS+5;
+    eS=tE+1;   eE=-1;
+  }else{
+    const ns=isNAP?-4:0;
+    hS=-10+ns; hE=-9+ns;
+    tS=-8+ns;  tE=-5+ns;
+    eS=-4+ns;  eE=-1+ns;
+  }
+  return[
+    {n:'SFX Creation', s:sfxS,e:sfxE,ci:0},
+    {n:'Hashigo',      s:hS,  e:hE,  ci:1},
+    {n:'TMKR Pricing', s:tS,  e:tE,  ci:2},
+    {n:'EAOD Pricing', s:eS,  e:eE,  ci:3},
+  ];
+}
+
+// Flat list of all MY entries for active brand
+function allMysFlat(){
+  const res=[];
+  activeModels().forEach((model,mi)=>{
+    model.mys.forEach((my)=>{res.push({my,mi,gi:res.length});});
+  });
+  return res;
+}
+
+function getRange(flatMys){
+  let mn=Infinity,mx=-Infinity;
+  activeModels().forEach(model=>{
+    model.mys.forEach(my=>{
+      const lo=mAbs(my);
+      if(dispMode!=='hom'){
+        getTaskRanges(my,model.prodType).forEach(t=>{
+          mn=Math.min(mn,lo+t.s); mx=Math.max(mx,lo+t.e);
+        });
+      }
+      if(dispMode!=='pp'){
+        getHomRanges(my).forEach(t=>{
+          mn=Math.min(mn,t.absStart); mx=Math.max(mx,t.absEnd);
+        });
+      }
+      // SA always included in range
+      const sa=getSaAbs(my);
+      if(sa!==null) mx=Math.max(mx,sa+1);
+    });
+  });
+  if(!isFinite(mn))return{min:0,max:4};
+  return{min:mn-2,max:mx+2};
+}
+
+// ── Controls ──────────────────────────────────────────────
+function setGW(w){
+  getsudoWeek=w;
+  document.querySelectorAll('.gb').forEach((b,i)=>b.classList.toggle('on',i+1===w));
+  render(); spOpen()&&renderSp();
+}
+function sm(m){
+  dispMode=m;
+  [{k:'pp',m:'pp'},{k:'hom',m:'hom'},{k:'bt',m:'both'}].forEach(({k,m:v})=>document.getElementById('b'+k).classList.toggle('on',v===m));
+  render(); spOpen()&&renderSp();
+}
+function setPT(localMi,pt){const mi=activeModelIdx(localMi);MODELS[mi].prodType=pt;renderCards();render();spOpen()&&renderSp();}
+function setMyHasTv(localMi,yi,v){const mi=activeModelIdx(localMi);MODELS[mi].mys[yi].hasTv=v;renderCards();render();spOpen()&&renderSp();}
+function setMyType(localMi,yi,v){const mi=activeModelIdx(localMi);MODELS[mi].mys[yi].myType=v;renderCards();render();spOpen()&&renderSp();}
+function spOpen(){return document.getElementById('spb').classList.contains('open');}
+
+// ── Model management ──────────────────────────────────────
+function addModel(){
+  const brandModels=activeModels();
+  const n=brandModels.length+1;
+  MODELS.push({id:nextMid++,name:'',brand:activeBrand,prodType:'JCBU',
+    mys:[{id:nextMyId++,name:`${26+n}MY`,month:`${2025+n}-08`,myType:'MY'}]});
+  updateBrandTabs();renderCards();render();
+}
+function removeModel(localMi){
+  const gi=activeModelIdx(localMi);
+  if(gi<0)return;
+  const brandCount=activeModels().length;
+  if(brandCount<=1)return;
+  MODELS.splice(gi,1);
+  updateBrandTabs();renderCards();render();
+}
+function addMY(localMi){
+  const mi=activeModelIdx(localMi);
+  const m=MODELS[mi],last=m.mys[m.mys.length-1];
+  const[y,mo]=last.month.split('-').map(Number);
+  const num=parseInt(last.name.match(/\d+/)?.[0]||'27');
+  m.mys.push({id:nextMyId++,name:`${num+1}MY`,month:`${y+1}-${String(mo).padStart(2,'0')}`,myType:'MY',hasTv:true,tvType:'CV',tvLineoff:'',ecoCarCert:false,buffers:[0,0,0,0]});
+  renderCards();render();
+}
+function removeMY(localMi,yi){
+  const mi=activeModelIdx(localMi);
+  if(MODELS[mi].mys.length<=1)return;MODELS[mi].mys.splice(yi,1);renderCards();render();
+}
+
+function renderCards(){
+  const bm=BRAND_META[activeBrand];
+  const models=activeModels();
+  const flatMys=allMysFlat();
+  let h='';
+  models.forEach((model,mi)=>{
+    const mc=MC_COLORS[mi%MC_COLORS.length];
+    const myOffset=flatMys.filter(x=>x.mi===mi)[0]?.gi??0;
+    h+=`<div class="mcard" style="border-color:${mc}50">
+      <div class="mcard-top">
+        <span class="mcard-color" style="background:${mc}"></span>
+        <input class="mname" type="text" placeholder="모델명 입력" value="${model.name}"
+          oninput="MODELS[activeModelIdx(${mi})].name=this.value;render()">
+        <button class="order-btn" onclick="moveModel(${mi},-1)" ${mi===0?'disabled':''}>↑</button>
+        <button class="order-btn" onclick="moveModel(${mi},1)" ${mi===models.length-1?'disabled':''}>↓</button>
+        ${models.length>1?`<button class="rm-model" onclick="removeModel(${mi})">×</button>`:''}
+      </div>
+      <div style="margin-bottom:7px">
+        <span class="fl" style="margin-bottom:3px">Production</span>
+        <div class="pseg">
+          ${PT_LIST.map(pt=>`<button class="pb${model.prodType===pt?' on':''}" onclick="setPT(${mi},'${pt}')">${pt}</button>`).join('')}
+        </div>
+      </div>
+      <span class="fl" style="margin-bottom:3px">Model Year</span>
+      <div class="mylist">
+        ${model.mys.map((my,yi)=>{
+          const lc=LCA[(myOffset+yi)%LCA.length];
+          return `<div class="mrow">
+            <span class="dot" style="background:${lc}"></span>
+            <input class="mni" type="text" value="${my.name}" placeholder="MY명"
+              oninput="MODELS[activeModelIdx(${mi})].mys[${yi}].name=this.value;render()">
+            <input type="month" value="${my.month}"
+              onchange="MODELS[activeModelIdx(${mi})].mys[${yi}].month=this.value;render()">
+            <select class="mts${my.myType!=='MY'?' btc':''}"
+              onchange="setMyType(${mi},${yi},this.value)">
+              ${MY_TYPES.map(t=>`<option${t===my.myType?' selected':''}>${t}</option>`).join('')}
+            </select>
+            ${model.mys.length>1?`<button class="rbtn" onclick="removeMY(${mi},${yi})">×</button>`:''}
+          </div>
+          <div class="mrow tv-row" style="margin-top:3px!important;flex-wrap:wrap;gap:4px!important">
+            <span class="tv-lbl">TV</span>
+            <div class="tv-seg">
+              <button class="tvb${my.hasTv!==false?' on':''}" onclick="setMyHasTv(${mi},${yi},true)">있음</button>
+              <button class="tvb${my.hasTv===false?' on':''}" onclick="setMyHasTv(${mi},${yi},false)">없음</button>
+            </div>
+            ${my.hasTv!==false?`
+              <select class="tv-type" onchange="MODELS[activeModelIdx(${mi})].mys[${yi}].tvType=this.value;render()">
+                ${['CV','1A','MPTA','Goguchi'].map(t=>`<option${t===(my.tvType||'CV')?' selected':''}>${t}</option>`).join('')}
+              </select>
+              <input type="month" value="${my.tvLineoff||''}"
+                onchange="MODELS[activeModelIdx(${mi})].mys[${yi}].tvLineoff=this.value;render()">
+              <label class="eco-chk">
+                <input type="checkbox" ${my.ecoCarCert?'checked':''}
+                  onchange="MODELS[activeModelIdx(${mi})].mys[${yi}].ecoCarCert=this.checked;render()">
+                Eco
+              </label>
+            `:''}
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="abtn" style="font-size:10px;padding:2px 8px" onclick="addMY(${mi})">+ MY</button>
+    </div>`;
+  });
+  h+=`<button class="add-model-card" onclick="addModel()"><span style="font-size:18px;line-height:1">+</span><span>모델 추가</span></button>`;
+  document.getElementById('mcards').innerHTML=h;
+}
+
+// ── Render Gantt ──────────────────────────────────────────
+function render(){
+  const flatMys=allMysFlat();
+  const r=getRange(flatMys);
+  const cols=[];
+  for(let a=r.min;a<=r.max;a++) cols.push({abs:a,...a2d(a)});
+
+  // Build loMap: abs -> gi (first MY registered at that abs wins for header display)
+  const loMap={};
+  flatMys.forEach(({my,gi})=>{ if(loMap[mAbs(my)]===undefined) loMap[mAbs(my)]=gi; });
+
+  // SA map: abs -> {gi} — always shown regardless of display mode
+  const saMap={};
+  activeModels().forEach((model,mi)=>{
+    const myOff=flatMys.filter(x=>x.mi===mi)[0]?.gi??0;
+    model.mys.forEach((my,yi)=>{
+      const sa=getSaAbs(my);
+      if(sa!==null && saMap[sa]===undefined) saMap[sa]={gi:myOff+yi};
+    });
+  });
+
+  const gcSet=new Set(cols.filter(c=>c.week===getsudoWeek).map(c=>c.abs));
+  const nc=cols.length;
+
+  let h=`<table class="g" style="min-width:100%">
+    <col style="width:80px"><col style="width:108px">`;
+  cols.forEach(()=>h+=`<col class="wkcol">`);
+
+  // ── Header Row 0: MY label ──
+  h+=`<thead><tr><th class="thfix" colspan="2" style="font-size:9px;color:#c4c2b9">MY · 연식</th>`;
+  cols.forEach(c=>{
+    const gi=loMap[c.abs];
+    if(gi!==undefined){
+      const{my}=flatMys[gi];
+      const lc=LCA[gi%LCA.length],lb=LBA[gi%LBA.length];
+      h+=`<th style="font-size:9px;font-weight:600;background:${lb};color:${lc};border-left:2.5px solid ${lc};padding:1px 2px;line-height:1.3">
+        ${my.name}<br><span style="opacity:.75">${my.myType}</span></th>`;
+    } else if(saMap[c.abs]!==undefined){
+      h+=`<th class="sa-hdr" style="font-size:9px;padding:1px">SA</th>`;
+    } else {
+      h+=`<th></th>`;
+    }
+  });
+  h+=`</tr>`;
+
+  // ── Header Row 1: Year ──
+  h+=`<tr><th class="thfix" colspan="2" style="font-size:9px;color:#c4c2b9"></th>`;
+  {
+    let yi=0;
+    while(yi<cols.length){
+      const{year}=cols[yi];
+      let span=0; const ysi=yi;
+      while(yi<cols.length&&cols[yi].year===year){span++;yi++;}
+      let st='font-size:11px;font-weight:700;color:#1a1a18;background:#f0ede8;';
+      h+=`<th colspan="${span}" style="${st}">${year}</th>`;
+    }
+  }
+  h+=`</tr>`;
+
+  // ── Header Row 2: Month ──
+  h+=`<tr><th class="thfix" colspan="2"></th>`;
+  let ci=0;
+  while(ci<cols.length){
+    const{year,month}=cols[ci];
+    let span=0, giFirst=-1; const si=ci;
+    while(ci<cols.length&&cols[ci].year===year&&cols[ci].month===month){
+      if(giFirst<0&&loMap[cols[ci].abs]!==undefined) giFirst=loMap[cols[ci].abs];
+      span++; ci++;
+    }
+    const gcStart=gcSet.has(cols[si].abs);
+    let st='font-size:10px;';
+    if(giFirst>=0){const lc=LCA[giFirst%LCA.length],lb=LBA[giFirst%LBA.length];st+=`background:${lb};color:${lc};font-weight:600;`;}
+    const hasSA=Array.from({length:span},(_,k)=>cols[si+k]||{}).some(c=>saMap[c.abs]!==undefined);
+    if(hasSA&&giFirst<0) st+='background:#DCFCE7;';
+    h+=`<th colspan="${span}" style="${st}">${MNS[month]}</th>`;
+  }
+  h+=`</tr>`;
+
+  // ── Header Row 2: Week ──
+  h+=`<tr><th class="thfix" colspan="2" style="font-size:9px;color:#c4c2b9">Task</th>`;
+  cols.forEach(c=>{
+    const gi=loMap[c.abs];
+    let cls='',st='font-size:10px;min-width:30px;';
+    if(gi!==undefined){const lc=LCA[gi%LCA.length],lb=LBA[gi%LBA.length];st+=`border-left:2.5px solid ${lc};background:${lb};color:${lc};font-weight:600;`;}
+    h+=`<th class="${cls}" style="${st}">${c.week}W`+`</th>`;
+  });
+  h+=`</tr></thead><tbody>`;
+
+  // ── Per-model rows ──
+  activeModels().forEach((model,mi)=>{
+    const mc=MC_COLORS[mi%MC_COLORS.length];
+    const mcbg=MC_BGS[mi%MC_BGS.length];
+    const myOffset=flatMys.filter(x=>x.mi===mi)[0]?.gi??0;
+    const label=model.name||`Model ${mi+1}`;
+
+    // rowspan: 1 (pp or hom only) or 2 (both)
+    const rowspan=(dispMode==='both')?2:1;
+
+    if(dispMode!=='hom'){
+      // Pricing row — model name cell spans all data rows
+      h+=`<tr>
+        <td class="mc" rowspan="${rowspan}"
+          style="border-left:3px solid ${mc};border-top:2px solid ${mc}40;vertical-align:middle">
+          <input class="mi" type="text" placeholder="모델명" value="${model.name}"
+            oninput="MODELS[activeModelIdx(${mi})].name=this.value;renderCards();render()">
+        </td>
+        <td class="tkc" style="border-top:2px solid ${mc}40">Pricing</td>`;
+      const allPPSegs=[];
+      model.mys.forEach((my,yi)=>{
+        const lo=mAbs(my);
+        getTaskRanges(my,model.prodType).forEach(task=>{
+          allPPSegs.push({absStart:lo+task.s, absEnd:lo+task.e, cls:'c'+task.ci, n:task.n});
+        });
+      });
+      h+=renderSegs(allPPSegs,cols,loMap,gcSet,saMap);
+      h+=`</tr>`;
+    }
+
+    if(dispMode!=='pp'){
+      // HOM row — no model name cell (merged above), or standalone if hom-only
+      h+=`<tr>`;
+      if(dispMode==='hom'){
+        h+=`<td class="mc" style="border-left:3px solid ${mc};border-top:2px solid ${mc}40;vertical-align:middle">
+          <input class="mi" type="text" placeholder="모델명" value="${model.name}"
+            oninput="MODELS[activeModelIdx(${mi})].name=this.value;renderCards();render()">
+        </td>`;
+      }
+      h+=`<td class="tkc"${dispMode==='hom'?` style="border-top:2px solid ${mc}40"`:''}>Homologation</td>`;
+      const allHomSegs=[];
+      model.mys.forEach(my=>{
+        getHomRanges(my).forEach(seg=>allHomSegs.push(seg));
+      });
+      h+=renderSegs(allHomSegs,cols,loMap,gcSet,saMap);
+      h+=`</tr>`;
+    }
+  });
+
+  h+=`</tbody></table>`;
+  document.getElementById('gw').innerHTML=h;
+  renderLeg(flatMys);
+}
+
+/**
+ * Render week cells for a row given an array of {absStart,absEnd,cls,n} segments.
+ * Each col gets exactly ONE <td> (empty or part of a colspan bar).
+ * We never skip a column — every col position maps to one td output.
+ */
+function renderSegs(segs,cols,loMap,gcSet,saMap){
+  // Build a sorted list of bar intervals on the column axis
+  // For each col index, determine: is it inside a segment? which one?
+  // We process cols left to right, greedily output colspan bars.
+
+  // Map each col to its segment (first match wins if overlap)
+  const colSeg=new Array(cols.length).fill(null);
+  segs.forEach(seg=>{
+    for(let i=0;i<cols.length;i++){
+      if(colSeg[i]===null && cols[i].abs>=seg.absStart && cols[i].abs<=seg.absEnd){
+        colSeg[i]=seg;
+      }
+    }
+  });
+
+  let h='',i=0;
+  while(i<cols.length){
+    const seg=colSeg[i];
+    const gi=loMap[cols[i].abs];
+    let lb='';
+    if(gi!==undefined) lb=`border-left:2.5px solid ${LCA[gi%LCA.length]}`;
+    else if(saMap&&saMap[cols[i].abs]!==undefined) lb='background:#DCFCE7;border-left:2px solid #22C55E;border-right:2px solid #22C55E';
+
+
+    if(seg!==null){
+      // Count consecutive cols that belong to the SAME segment object
+      let span=0;
+      while(i+span<cols.length && colSeg[i+span]===seg) span++;
+      h+=`<td class="bc" colspan="${span}" style="${lb}">
+        <div class="bar ${seg.cls}"><span>${seg.n}</span></div>
+      </td>`;
+      i+=span;
+    } else {
+      h+=`<td style="height:26px;${lb}"></td>`;
+      i++;
+    }
+  }
+  return h;
+}
+
+function renderLeg(flatMys){
+  let h='';
+  flatMys.forEach(({my,gi})=>{
+    const lc=LCA[gi%LCA.length];
+    h+=`<span><span class="ld" style="width:7px;height:7px;border-radius:50%;background:${lc}"></span>${my.name} <span class="mtbadge ${my.myType==='MY'?'mt-MY':'mt-other'}">${my.myType}</span></span>`;
+  });
+  h+=`<span><span class="ld" style="font-size:10px;color:#6d28d9">◆</span>Getsudo (W${getsudoWeek})</span>`;
+  if(dispMode!=='hom'){
+    const ppLabels=['SFX Creation','Hashigo','TMKR Pricing','EAOD Pricing'];
+    h+=`<span>`;
+    PL.forEach((c,i)=>h+=`<span class="ld" style="width:20px;height:8px;border-radius:2px;background:${c};${i>0?'margin-left:2px':''}"></span>`);
+    h+=` Pricing (${ppLabels.join(' → ')})</span>`;
+  }
+  if(dispMode!=='pp'){
+    const hmColors=['#CCFBF1','#5EEAD4','#2DD4BF','#0D9488','#0F766E'];
+    const hmLabels=['Vehicle Prep','TMC Test','FE Test','Emission/FE/Safety','Eco-car Cert.'];
+    h+=`<span>`;
+    hmColors.forEach((c,i)=>h+=`<span class="ld" style="width:16px;height:8px;border-radius:2px;background:${c};${i>0?'margin-left:2px':''}"></span>`);
+    h+=` Homologation (${hmLabels.join(' → ')})</span>`;
+  h+=`<span><span class="ld" style="width:8px;height:14px;border-left:2px solid #22C55E;margin-right:2px"></span>Sales Available</span>`;
+  }
+  document.getElementById('lg').innerHTML=h;
+}
+
+function tsp(){
+  const b=document.getElementById('spb'),o=b.classList.toggle('open');
+  document.getElementById('arr').textContent=o?'▲':'▼';
+  if(o) renderSp();
+}
+function renderSp(){
+  let h='';
+  activeModels().forEach((model,mi)=>{
+    const mc=MC_COLORS[mi%MC_COLORS.length];
+    const label=model.name||`Model ${mi+1}`;
+    h+=`<div><p class="sc" style="color:${mc}">${label} · ${model.prodType}</p>`;
+    model.mys.forEach(my=>{
+      const ranges=getTaskRanges(my,model.prodType);
+      h+=`<div style="margin-bottom:6px">
+        <div style="font-size:10px;font-weight:600;color:#5f5e5a;margin-bottom:3px">
+          ${my.name} <span class="mtbadge ${my.myType==='MY'?'mt-MY':'mt-other'}">${my.myType}</span>
+        </div>`;
+      ranges.forEach(t=>h+=`<div class="sr"><span class="sdot" style="background:${PL[t.ci]}"></span><b>${t.n}</b>N${t.s}w ~ N${t.e}w</div>`);
+      h+=`</div>`;
+    });
+    h+=`</div>`;
+  });
+  // HOM buffer section
+  if(dispMode!=='pp'){
+    activeModels().forEach((model,mi)=>{
+      const mc=MC_COLORS[mi%MC_COLORS.length];
+      const label=model.name||`Model ${mi+1}`;
+      h+=`<div><p class="sc" style="color:${mc}">${label} · Homologation 버퍼</p>`;
+      model.mys.forEach((my,yi)=>{
+        if(my.hasTv===false){h+=`<div style="font-size:10px;color:#c4c2b9;margin-bottom:8px">${my.name}: TV 없음 (MY Cert.)</div>`;return;}
+        if(!my.tvLineoff){h+=`<div style="font-size:10px;color:#c4c2b9;margin-bottom:8px">${my.name}: TV 라인오프 미입력</div>`;return;}
+        const tasks=HOM_TASKS.filter(t=>!t.optional||my.ecoCarCert);
+        h+=`<div style="font-size:10px;font-weight:600;color:#5f5e5a;margin-bottom:4px">${my.name} (TV: ${my.tvLineoff})</div>`;
+        tasks.slice(0,-1).forEach((task,ti)=>{
+          h+=`<div class="buf-row">
+            <b>${task.n} 이후 →</b>
+            <input class="buf-inp" type="number" min="0" value="${(my.buffers||[])[ti]||0}"
+              onchange="MODELS[activeModelIdx(${mi})].mys[${yi}].buffers[${ti}]=+this.value;render()">
+            <span style="font-size:10px;color:#b4b2a9">주</span>
+          </div>`;
+        });
+        h+=`<div style="margin-bottom:8px"></div>`;
+      });
+      h+=`</div>`;
+    });
+  }
+
+  document.getElementById('spg').innerHTML=h||'<p style="font-size:11px;color:#b4b2a9">표시할 항목 없음</p>';
+}
+
+
+// ── JSON Export / Import ─────────────────────────────────
+function getSnapshot(){
+  return JSON.stringify({
+    version:1,
+    getsudoWeek,
+    dispMode,
+    activeBrand,
+    models: MODELS
+  }, null, 2);
+}
+
+function exportJSON(){
+  const blob=new Blob([getSnapshot()],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const d=new Date();
+  const ds=d.getFullYear()+''+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  a.download='schedule_master_'+ds+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('저장 완료 ✓');
+}
+
+function importJSON(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      applySnapshot(data);
+      showToast('불러오기 완료 ✓  ('+MODELS.length+'개 모델)');
+    }catch(err){
+      showToast('⚠ 파일 형식이 올바르지 않습니다');
+    }
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function copyShareText(){
+  const snap=getSnapshot();
+  navigator.clipboard.writeText(snap).then(()=>{
+    showToast('클립보드에 복사됨 ✓  (채팅에 붙여넣기 후 공유)');
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=snap; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('클립보드에 복사됨 ✓');
+  });
+}
+
+function resetData(){
+  if(!confirm('모든 데이터를 초기화할까요?')) return;
+  MODELS=[
+    {id:1,name:'',brand:'TOYOTA',prodType:'JCBU',mys:[{id:1,name:'27MY',month:'2026-08',myType:'MY'}]},
+    {id:2,name:'',brand:'LEXUS', prodType:'JCBU',mys:[{id:3,name:'27MY',month:'2026-08',myType:'MY'}]},
+    {id:3,name:'',brand:'GR',    prodType:'JCBU',mys:[{id:4,name:'27MY',month:'2026-08',myType:'MY'}]}
+  ];
+  nextMid=4; nextMyId=100;
+  activeBrand='TOYOTA';
+  updateBrandTabs();renderCards();render();
+  showToast('초기화 완료');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+
+
+// ── Collapsible panel ────────────────────────────────────
+function togglePanel(){
+  const body=document.getElementById('cpanelBody');
+  const arrow=document.getElementById('cpanelArrow');
+  const isOpen=!body.classList.contains('collapsed');
+  body.classList.toggle('collapsed', isOpen);
+  arrow.classList.toggle('open', !isOpen);
+}
+// ── OneDrive / Local Folder Sync ─────────────────────────
+const IDB_NAME='ScheduleMaster', IDB_STORE='handles', HANDLE_KEY='folderHandle';
+const DATA_FILENAME='schedule_master_data.json';
+let folderHandle=null;
+
+// Open IndexedDB
+function openIDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=e=>rej(e);
+  });
+}
+async function idbSet(key,val){
+  const db=await openIDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).put(val,key);
+    tx.oncomplete=res; tx.onerror=rej;
+  });
+}
+async function idbGet(key){
+  const db=await openIDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(IDB_STORE,'readonly');
+    const req=tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=rej;
+  });
+}
+
+function setOndStatus(state, msg){
+  const dot=document.getElementById('ondDot');
+  const status=document.getElementById('ondStatus');
+  const saveBtn=document.getElementById('ondSaveBtn');
+  dot.className='ond-dot'+(state==='connected'?' connected':state==='error'?' error':'');
+  status.textContent=msg;
+  saveBtn.disabled=(state!=='connected');
+  const bar=document.getElementById('ondBar');
+  if(state==='connected') bar.style.background='#f0fdf4', bar.style.borderColor='#bbf7d0';
+  else if(state==='error') bar.style.background='#fff5f5', bar.style.borderColor='#fca5a5';
+  else bar.style.background='#f0f7ff', bar.style.borderColor='#bfdbfe';
+}
+
+async function connectFolder(){
+  // 1. API 지원 여부 확인
+  if(!window.showDirectoryPicker){
+    alert('이 브라우저는 폴더 연결을 지원하지 않습니다.\nEdge 또는 Chrome에서 로컬 파일로 열어주세요.\n\n현재 환경: '+navigator.userAgent.slice(0,80));
+    return;
+  }
+  // 2. 웹(OneDrive 브라우저)에서 열었는지 감지
+  if(location.protocol!=='file:' && !location.hostname.includes('localhost')){
+    alert('OneDrive 웹에서 직접 열면 폴더 연결이 불가능합니다.\n\n해결 방법:\n1. PC에 OneDrive 앱 설치 후 폴더 동기화\n2. 탐색기에서 HTML 파일을 직접 더블클릭하여 열기\n3. 그 후 폴더 연결 버튼 클릭');
+    return;
+  }
+  try{
+    setOndStatus('','연결 중...');
+    const handle=await window.showDirectoryPicker({mode:'readwrite'});
+    folderHandle=handle;
+    await idbSet(HANDLE_KEY, handle);
+    setOndStatus('connected', '📁 '+handle.name+' 연결됨');
+    showToast('폴더 연결 완료! data.json을 불러옵니다...');
+    await loadFromFolder(true);
+  }catch(e){
+    console.error('connectFolder error:', e);
+    if(e.name==='AbortError'){
+      setOndStatus('','폴더 선택이 취소됐습니다');
+    }else if(e.name==='SecurityError'){
+      alert('보안 정책으로 인해 폴더 접근이 차단됐습니다.\n브라우저 설정 또는 사내 보안 정책을 확인해주세요.');
+    }else{
+      alert('연결 실패: '+e.name+' - '+e.message);
+    }
+  }
+}
+
+async function restoreFolder(){
+  try{
+    const handle=await idbGet(HANDLE_KEY);
+    if(!handle) return;
+    // Check permission
+    const perm=await handle.queryPermission({mode:'readwrite'});
+    if(perm==='granted'){
+      folderHandle=handle;
+      setOndStatus('connected','📁 '+handle.name+' 연결됨 (자동 복원)');
+      await loadFromFolder(false);
+    } else {
+      // Need to re-request on user gesture — show prompt button
+      setOndStatus('','📁 '+handle.name+' — 아래 버튼을 눌러 재연결해주세요');
+      document.getElementById('ondSaveBtn').disabled=true;
+      // Store handle for reconnect
+      window._pendingHandle=handle;
+      const reconnBtn=document.createElement('button');
+      reconnBtn.className='ond-btn';
+      reconnBtn.textContent='🔓 재연결';
+      reconnBtn.onclick=async()=>{
+        const p=await window._pendingHandle.requestPermission({mode:'readwrite'});
+        if(p==='granted'){
+          folderHandle=window._pendingHandle;
+          await idbSet(HANDLE_KEY,folderHandle);
+          setOndStatus('connected','📁 '+folderHandle.name+' 연결됨');
+          reconnBtn.remove();
+          await loadFromFolder(false);
+        }
+      };
+      document.getElementById('ondBar').querySelector('.ond-btns').prepend(reconnBtn);
+    }
+  }catch(e){/* no saved handle */}
+}
+
+async function loadFromFolder(showMsg=true){
+  if(!folderHandle) return;
+  try{
+    const fileHandle=await folderHandle.getFileHandle(DATA_FILENAME,{create:false});
+    const file=await fileHandle.getFile();
+    const text=await file.text();
+    const data=JSON.parse(text);
+    applySnapshot(data);
+    if(showMsg) showToast('불러오기 완료 ✓  ('+MODELS.length+'개 모델)');
+  }catch(e){
+    if(e.name==='NotFoundError'){
+      if(showMsg) showToast('data.json 없음 — 저장 버튼으로 첫 파일을 만들어주세요');
+    }else{
+      showToast('⚠ 불러오기 실패: '+e.message);
+    }
+  }
+}
+
+async function saveToFolder(){
+  if(!folderHandle){ showToast('폴더가 연결되지 않았습니다'); return; }
+  try{
+    const fileHandle=await folderHandle.getFileHandle(DATA_FILENAME,{create:true});
+    const writable=await fileHandle.createWritable();
+    await writable.write(getSnapshot());
+    await writable.close();
+    const ind=document.getElementById('saveIndicator');
+    ind.style.display='inline';
+    setTimeout(()=>ind.style.display='none',2500);
+    showToast('저장 완료 ✓  OneDrive에 자동 동기화됩니다');
+  }catch(e){
+    showToast('⚠ 저장 실패: '+e.message);
+  }
+}
+
+function applySnapshot(data){
+  if(!data.models||!Array.isArray(data.models)) throw new Error('invalid');
+  MODELS=data.models;
+  if(data.getsudoWeek) getsudoWeek=data.getsudoWeek;
+  if(data.dispMode) dispMode=data.dispMode;
+  if(data.activeBrand) activeBrand=data.activeBrand;
+  document.querySelectorAll('.gb').forEach((b,i)=>b.classList.toggle('on',i+1===getsudoWeek));
+  [{k:'pp',m:'pp'},{k:'hom',m:'hom'},{k:'bt',m:'both'}].forEach(({k,m})=>document.getElementById('b'+k).classList.toggle('on',m===dispMode));
+
+  updateBrandTabs();renderCards();render();
+}
+
+updateBrandTabs();
+renderCards();
+render();
+restoreFolder();
+</script>
+</body>
+</html>
